@@ -25,9 +25,13 @@ class SoundCloudConnection:
 
 
 if __name__ == '__main__':
+    import subprocess
+
+    import pathlib
+    base_path = pathlib.Path(__file__).parent.absolute()
     s = SoundCloudConnection()
-    d = SubscribeToMp3DB(songs_path=r'..\backup\songs.json', artists_path=r'..\backup\artists.json',
-                         filters_path=r'..\backup\filters.json')
+    d = SubscribeToMp3DB(songs_path=f'{base_path}\\config\\songs.json', artists_path=f'{base_path}\\config\\artists.json',
+                         filters_path=f'{base_path}\\config\\filters.json')
     downloader = SoundCloudDownloader()
     song_links = []
     for artist in d.get_artists():
@@ -37,18 +41,17 @@ if __name__ == '__main__':
             traceback.print_exc()
     downloaded_songs_dict = d.get_songs()
     downloaded_songs_set = set(downloaded_songs_dict.keys())
-    new_song_links = filter(lambda link: link not in downloaded_songs_set, song_links)
-    print "Congrats! Found "+str(len(new_song_links))+" new songs."
-    i=0
+    new_song_links = list(filter(lambda link: link not in downloaded_songs_set, song_links))
+    print("Congrats! Found " + str(len(new_song_links)) + " new songs.")
+    i = 0
     for new_song_link in new_song_links:
         try:
-            print "downloading " + str(new_song_link)+" ..."
+            print("downloading " + str(new_song_link) + " ...")
             out = downloader.download(new_song_link, '..\music')
-            downloaded_songs_dict[new_song_link]=""
-            print "finished"
-            i+=1
+            downloaded_songs_dict[new_song_link] = ""
+            print("finished")
+            i += 1
         except Exception as e:
             traceback.print_exc()
-            print out
     d.write_list_to_file(downloaded_songs_dict, d.songs_path)
-    print "Added " + str(i) + " new songs. Cool stuff"
+    print("Added " + str(i) + " new songs. Cool stuff")
